@@ -4,10 +4,9 @@ public class GameMethods {
     public GameMethods(int cardNum) {
         this.cardNum = cardNum;
     }
-    public String generateCards(String demo) {
-        deck = "Blue 8 card,Wild Card,Green Skip Card,Yellow 2 card,Green 4 card,Blue Draw-2 Card,Red 6 card,";
-        return deck;
-    }
+    /* generates a certain number of cards based on the parameter
+    probabilities are based on actual UNO decks
+     */
     public String generateCards(int numOfCards) {
         int num = 0;
         int color = 0;
@@ -51,7 +50,7 @@ public class GameMethods {
                 }
                 for (int j = 0; j <= 9; j++) {
                     if (j == number) {
-                        deck = deck + number + " card,";
+                        deck = deck + number + " Card,";
                     }
                 }
             } else if (num >= 101 && num <= 104) {
@@ -63,14 +62,18 @@ public class GameMethods {
         setDeck(deck);
         return deck;
     }
+    // checks if the user has any cards that can be put down
     public Boolean canPutDown(String topCard, String deck) {
         String color = "null";
         String num = "null";
+        /* if the length is 6, this means there is only a color on top
+        this only occurs if the previous card was a wild card or a draw-4 card
+         */
         if(topCard.length()<=6) {
             color = topCard;
         } else {
             for (int i = 0; i <= 9; i++) {
-                String number = Integer.toString(i);
+                String number = Integer.toString(i); // https://stackoverflow.com/questions/5071040/java-convert-integer-to-string
                 if (topCard.indexOf(number) != -1) {
                     color = topCard.substring(0, topCard.indexOf(number) - 1);
                     num = number;
@@ -84,29 +87,28 @@ public class GameMethods {
             num="null";
         }
         if(deck.indexOf(num)>-1 || deck.indexOf(color)>-1) {
+            if(num.equals("2")) {
+                if(deck.indexOf("Draw-2")>-1) {
+                    if(deck.substring(0, deck.indexOf("Draw-2")).indexOf("2")>-1) {
+                        return true;
+                    } else if(deck.substring(deck.indexOf("-2")+2).indexOf("2")>-1) {
+                        return true;
+                    } else {
+                        return false;
+                    }
+                }
+
+            }
             return true;
         } else if(deck.indexOf("Wild Card")>-1){
+            return true;
+        } else if(deck.indexOf("Draw-4 Card")>-1) {
             return true;
         } else {
             return false;
         }
     }
-    public void pickUp(int num) {
-        deck = deck + generateCards(num);
-    }
-
-    private void setDeck(String deck) {
-        this.deck = deck;
-    }
-    public String getDeck() {
-        return deck;
-    }
-    public int numOfCards() {
-        return cardNum;
-    }
-    public void updateCardNum(int num) {
-        cardNum= cardNum+num;
-    }
+    // starting card can only be a numbered card
     public String startingCard() {
         int color = (int) (Math.random() * 4) + 1;
         int number = (int) (Math.random() * 9);
@@ -130,9 +132,10 @@ public class GameMethods {
         }
         return card;
     }
+    // chooses card for computer to put down based on color and number
     public String chooseCard(String card) {
-        String color = "";
-        String num = "";
+        String color = "null";
+        String num = "null";
         String chosenCard = "";
         if (card.length() <= 6) {
             color = card;
@@ -142,7 +145,7 @@ public class GameMethods {
             }
         } else {
             for (int i = 0; i <= 9; i++) {
-                String number = Integer.toString(i);
+                String number = Integer.toString(i); // https://stackoverflow.com/questions/5071040/java-convert-integer-to-string
                 if (card.indexOf(number) != -1) {
                     color = card.substring(0, card.indexOf(number) - 1);
                     num = number;
@@ -155,6 +158,11 @@ public class GameMethods {
                 num = "null";
                 color = card.substring(0, card.indexOf(" D"));
             }
+            /* if color is found, it finds a card based on the color
+            if number is found, it finds a card based on the number
+            if neither are found, it checks for a wild card
+            if there is no wild card, there has to be a Draw-4 Card, since this code isn't executed unless canPutDown is true
+             */
             if (deck.indexOf(color) > -1) {
                 chosenCard = deck.substring(deck.indexOf(color.substring(0, 1)));
                 if (chosenCard.indexOf("d,") == -1) {
@@ -163,12 +171,14 @@ public class GameMethods {
                     chosenCard = chosenCard.substring(0, chosenCard.indexOf("d,") + 1);
                 }
             } else if(deck.indexOf(num)>-1){
-                chosenCard = deck.substring(0, deck.indexOf(num) + 1) + " card";
+                chosenCard = deck.substring(0, deck.indexOf(num) + 1) + " Card";
                 while ((chosenCard.substring(0, chosenCard.indexOf("d"))).indexOf(num) == -1) {
-                    chosenCard = chosenCard.substring(chosenCard.indexOf(",") + 2);
+                    chosenCard = chosenCard.substring(chosenCard.indexOf("d") + 2);
                 }
             } else if(deck.indexOf("Wild Card")>-1) {
                 chosenCard = "Wild Card";
+            } else {
+                chosenCard = "Draw-4 Card";
             }
         }
         return chosenCard;
@@ -181,6 +191,22 @@ public class GameMethods {
         } else {
             deck = deck.substring(0, idx) + deck.substring(idx+cardLength+1);
         }
+    }
+    public void pickUp(int num) {
+        deck = deck + generateCards(num);
+    }
+
+    private void setDeck(String deck) {
+        this.deck = deck;
+    }
+    public String getDeck() {
+        return deck;
+    }
+    public int numOfCards() {
+        return cardNum;
+    }
+    public void updateCardNum(int num) {
+        cardNum= cardNum+num;
     }
 
 }

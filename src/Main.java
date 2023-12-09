@@ -6,6 +6,5 @@ public class Main {
             String name = scan.nextLine();
             GameRunner game = new GameRunner(name);
             game.setup();
-
     }
 }
